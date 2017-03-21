@@ -37,6 +37,7 @@ import org.traccar.model.DeviceTotalDistance;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
+import org.traccar.rabbit.PositionPublisher;
 
 public class DeviceManager implements IdentityManager {
 
@@ -58,6 +59,7 @@ public class DeviceManager implements IdentityManager {
 
     private boolean fallbackToText;
 
+    private PositionPublisher positionPublisher = new PositionPublisher();
     public DeviceManager(DataManager dataManager) {
         this.dataManager = dataManager;
         this.config = Context.getConfig();
@@ -218,6 +220,8 @@ public class DeviceManager implements IdentityManager {
         if (isLatestPosition(position)) {
 
             dataManager.updateLatestPosition(position);
+
+            positionPublisher.publishPosition(position); // Publish position
 
             if (devicesById.containsKey(position.getDeviceId())) {
                 devicesById.get(position.getDeviceId()).setPositionId(position.getId());
